@@ -1,25 +1,36 @@
 package com.pinkalligator.pizzeriasim;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.util.concurrent.Semaphore;
+
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 
 public class Main extends ApplicationAdapter {
-    private SpriteBatch batch;
-    private Texture image;
+    private Semaphore semaphore;
+    //Semaphore int permit = 1: only 1 thread at time can have permission
+    //Default boolean to true, what means the threads are accessing it
+    //with FIFO policy.
 
-    BucketThread myBucket;
+    private SpriteBatch batch; //default size of batch is 1000
+
+    int bucketThreads = 2;
+    BucketThread[] myBuckets = new BucketThread[bucketThreads];
 
     //Initialize and Load Content
     @Override
     public void create() {
+        semaphore = new Semaphore(1);
         batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
-        myBucket = new BucketThread("bucket.png", new Vector2(0,0));
+
+        //initialize  and start running threads
+
     }
 
     //Update and Draw
@@ -27,11 +38,15 @@ public class Main extends ApplicationAdapter {
     public void render() {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
-        batch.begin();
-        batch.draw(image, 140, 210);
+        //Escape KEY
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+            Gdx.app.exit(); // Exit the application
+        }
 
-        myBucket.draw(batch);
-        myBucket.update();
+        batch.begin();
+
+
+        //semaphore here for the draw of multithreads
 
         batch.end();
     }
@@ -41,8 +56,9 @@ public class Main extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
 
-        myBucket.dispose();
+        //Dispose threads
 
-        image.dispose();
+        }
     }
+
 }
