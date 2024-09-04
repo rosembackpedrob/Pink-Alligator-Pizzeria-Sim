@@ -3,7 +3,7 @@ package com.pinkalligator.pizzeriasim.gwt;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
-import com.pinkalligator.pizzeriasim.Main;
+import com.pinkalligator.pizzeriasim.ST_Simulation;
 
 /** Launches the GWT application. */
 public class GwtLauncher extends GwtApplication {
@@ -21,6 +21,6 @@ public class GwtLauncher extends GwtApplication {
 
         @Override
         public ApplicationListener createApplicationListener () {
-            return new Main();
+            return new ST_Simulation();
         }
 }

@@ -2,8 +2,8 @@ package com.pinkalligator.pizzeriasim.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.pinkalligator.pizzeriasim.Main;
-import com.pinkalligator.pizzeriasim.MT_TestsMain;
+import com.pinkalligator.pizzeriasim.ST_Simulation;
+import com.pinkalligator.pizzeriasim.MT_Simulation;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
@@ -13,7 +13,7 @@ public class Lwjgl3Launcher {
     }
 
     private static Lwjgl3Application createApplication() {
-        return new Lwjgl3Application(new Main(), getDefaultConfiguration());
+        return new Lwjgl3Application(new ST_Simulation(), getDefaultConfiguration());
     }
 
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
