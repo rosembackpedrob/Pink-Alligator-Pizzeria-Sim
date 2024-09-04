@@ -1,5 +1,6 @@
 package com.pinkalligator.pizzeriasim;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -14,12 +15,14 @@ public class Pizzaiolo {
     private Pantry pantry;
     private ArrayList<Pizza> pizzasStack; //where it's stores the pizza made by each pizzaiolo
 
-    private boolean stopMaking;
+    float makingTime = 0.5f;
+    float currentMakeTime = 0f;
+    private String doneFeedback = "";
 
     SpriteBatch pizzaioloBatch;
 
-    private String texturePath = "bucket.png";
-    private String tagTexturePath = "bucket.png"; //texture for the type of pizza this guy makes
+    private String texturePath = "Objects/pinkAlligatorChef.png";
+    private String tagTexturePath = "Objects/"; //texture for the type of pizza this guy makes
     private Texture texture;
     private Texture tagTexture;
 
@@ -32,12 +35,10 @@ public class Pizzaiolo {
         this.pantry = pantry;
         this.pizzasStack = new ArrayList<>(); // Initializes the ArrayList
 
-        stopMaking = false;
-
         pizzaioloBatch = new SpriteBatch();
 
         texture = new Texture(texturePath);
-        tagTexture = new Texture(tagTexturePath);
+        tagTexture = new Texture(tagTexturePath + functionTag + ".png");
         font = new BitmapFont();
     }
 
@@ -48,47 +49,62 @@ public class Pizzaiolo {
         pizzaioloBatch.draw(tagTexture, tagInitialPos.x, tagInitialPos.y);
 
         int stackQnt = pizzasStack.size();
-        String text = "Qnt  " + stackQnt;
+        String text = this.name + " -- PizzasStack:  " + stackQnt + "  " + doneFeedback;
         font.draw(pizzaioloBatch, text, fontPos.x, fontPos.y);
 
         pizzaioloBatch.end();
     }
 
-    public void makeMyTagOfPizza(){
+    public void dispose()
+    {
+        pizzaioloBatch.dispose();
+
+        texture.dispose();
+        tagTexture.dispose();
+        font.dispose();
+    }
+
+    public void makeMyTagOfPizza(float makingTime){
+        this.makingTime = makingTime;
+        if(currentMakeTime > 0) {
+            currentMakeTime -= Gdx.graphics.getDeltaTime();
+            if(currentMakeTime <= makingTime /2) {
+                doneFeedback = "";
+            }
+            return;
+        }
+        currentMakeTime = makingTime;
+
+        String[] ingredients = {};
         switch (functionTag) {
             case "TomatoPizza":
-                makePizzaTomato();
+                ingredients = new String[]{"dough", "tomato"};
+                makePizza("TomatoPizza", ingredients);
                 break;
             case "PepperoniPizza":
-                makePizzaPepperoni();
+                ingredients = new String[]{"dough", "pepperoni"};
+                makePizza("PepperoniPizza", ingredients);
                 break;
         }
     }
 
-    public void makePizzaTomato(){
+    public void makePizza(String pizzaName, String... ingredientsList){
         int quantityNeeded = 1; // consume 1 of each to make this pizza
-        String[] ingredientsList = {"dough","tomato"};
-        boolean hasConsumed = pantry.consumeIngredients(quantityNeeded, ingredientsList);
-        if(hasConsumed && !stopMaking) {
-            Pizza newPizza = new Pizza("Tomato_Pizza");;
-            System.out.println("fiz pizza");
+        boolean canConsume = pantry.canConsume(quantityNeeded,ingredientsList);
+
+        if(canConsume) {
+            for (String ingredient : ingredientsList) {
+                pantry.consumeIngredients(quantityNeeded, ingredient);
+            }
+            Pizza newPizza = new Pizza(pizzaName);;
             pizzasStack.add(newPizza);
-        } else {
-            //couldn't make pizza
-            this.stopMaking = true;
+            doneFeedback = "*DONE*";
         }
     }
 
-    public void makePizzaPepperoni(){
-        int quantityNeeded = 1; // consume 1 of each to make this pizza
-        String[] ingredientsList = {"dough","pepperoni"};
-        boolean hasConsumed = pantry.consumeIngredients(quantityNeeded, ingredientsList);
-        if(hasConsumed) {
-            Pizza newPizza = new Pizza("Pepperoni_Pizza");;
-            pizzasStack.add(newPizza);
-        } else {
-            //couldn't produce
-        }
+    public int getPizzaStackSize()
+    {
+        return pizzasStack.size();
     }
 
 }

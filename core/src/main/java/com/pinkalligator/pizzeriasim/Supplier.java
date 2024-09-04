@@ -1,5 +1,6 @@
 package com.pinkalligator.pizzeriasim;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -8,23 +9,25 @@ import com.badlogic.gdx.math.Vector2;
 public class Supplier {
 
     private String name;
-    private float speed;
+    private float prodTime = 1; // time to Produce in Seconds
+    private float currentProdTime; //current prodution time
     private Pantry pantry;
-    //private Random random;
 
-    private int producingNow;
+    private String producingNow;
+    private String producedFeedback = "";
 
     private SpriteBatch supplierBatch;
-    private String texturePath = "bucket.png";
+    private String texturePath = "Objects/supplier.png";
     private Texture texture;
     private BitmapFont font;
 
-    public Supplier (String name, Float speed, Pantry pantry) {
+    public Supplier (String name, Float prodTime, Pantry pantry) {
         this.name = name;
-        this.speed = speed;
+        this.prodTime = prodTime;
+        currentProdTime = prodTime;
         this.pantry = pantry;
 
-        producingNow = 0;
+        producingNow = "nothing";
 
         supplierBatch = new SpriteBatch();
         texture = new Texture(texturePath);
@@ -36,7 +39,7 @@ public class Supplier {
 
         supplierBatch.draw(texture, initialPos.x, initialPos.y);
 
-        String text = "Producing... " + producingNow;
+        String text = "Producing... " + producingNow + " " + producedFeedback;
         font.setColor(1f,1f,1f,1f);
         //font.getData().setScale(1.5f);
         font.draw(supplierBatch, text, fontPos.x, fontPos.y);
@@ -50,13 +53,26 @@ public class Supplier {
         font.dispose();
     }
 
-    public void produceIngredient(int quantity, String... ingredients){
-        boolean canProduce = pantry.produceIngredients(quantity, ingredients);
+    public void produceIngredient(int quantity, String ingredient){
+
+        if(currentProdTime > 0) {
+            currentProdTime -= Gdx.graphics.getDeltaTime();
+            if(currentProdTime <= prodTime/2) {
+                producedFeedback = "";
+            }
+            return;
+        }
+        currentProdTime = prodTime;
+        producedFeedback = "produced";
+
+        boolean canProduce = pantry.produceIngredients(quantity, ingredient);
         if(canProduce){
             producingNow += quantity;
+            producingNow = ingredient;
         } else {
             //couldn't produce MORE ingredients
-            producingNow = 0;
+            producingNow = "nothing";
+
         }
 
     }
