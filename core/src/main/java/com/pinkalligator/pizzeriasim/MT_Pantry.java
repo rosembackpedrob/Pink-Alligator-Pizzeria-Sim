@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 
-public class Pantry {
+import java.util.concurrent.Semaphore;
+
+public class MT_Pantry extends Thread {
 
     //Ingredients
     private int dough;
@@ -19,7 +21,9 @@ public class Pantry {
 
     private int ingredientsLimit = 100;
 
-    public Pantry(int dough, int tomato, int pepperoni, int ingredientsLimit) {
+    private Semaphore semaphore = new Semaphore(1);;
+
+    public MT_Pantry(int dough, int tomato, int pepperoni, int ingredientsLimit) {
         this.dough = dough;
         this.tomato = tomato;
         this.pepperoni = pepperoni;
@@ -29,6 +33,12 @@ public class Pantry {
         font = new BitmapFont();
 
         this.ingredientsLimit = ingredientsLimit;
+    }
+
+    @Override
+    public void run() {
+        //run thread below
+
     }
 
     public void draw(Vector2 initialPos, Vector2 fontPos) {
@@ -53,7 +63,7 @@ public class Pantry {
 
     public boolean produceIngredients(int quantity, String ingredientName) {
         boolean canProduce = false;
-            //System.out.println(quantity + "  " + ingredientName);
+
             switch (ingredientName) {
                 case "dough":
                     canProduce = canProduce(this.dough, quantity);
@@ -94,20 +104,29 @@ public class Pantry {
 
     //these 2 methods below CHECKS if can = true AND actually consume or produce
     private boolean canProduce(int ingredientInPantry, int quantityToProduce) {
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         boolean isPantryFull = ingredientInPantry + quantityToProduce > this.ingredientsLimit ;
-
+        semaphore.release();
         if(!isPantryFull) {
             return true;
         } else {
             return false;
             //pantry is full
         }
-
     }
 
     public boolean canConsume(int quantityToConsume, String... ingredientsNames) {
         int canConsume = 0;
 
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         for (String ingredient : ingredientsNames) {
             switch(ingredient) {
                 case "dough":
@@ -130,6 +149,7 @@ public class Pantry {
                     break;
             }
         }
+        semaphore.release();
         return canConsume == ingredientsNames.length;
     }
 

@@ -3,6 +3,7 @@ package com.pinkalligator.pizzeriasim;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -38,6 +39,8 @@ public class ST_Simulation extends ApplicationAdapter {
         batch = new SpriteBatch();
 
         //Initializing Objects
+
+        startSeqTime = System.currentTimeMillis(); //tempo sequencial inicial
         pantry = new Pantry(0,0, 0, 100);
         numberOfEach = 3;
 
@@ -67,8 +70,6 @@ public class ST_Simulation extends ApplicationAdapter {
         }
 
         //Updates:
-        startSeqTime = System.currentTimeMillis(); //tempo sequencial inicial
-
         //Try Make Pizza
         pizzaiolos[0].makeMyTagOfPizza(1f); //when he's MAKING he already checks to CONSUME from Pantry
         pizzaiolos[1].makeMyTagOfPizza(1f);
@@ -85,13 +86,18 @@ public class ST_Simulation extends ApplicationAdapter {
         suppliers[1].produceIngredient(2, "tomato");
         suppliers[2].produceIngredient(1, "pepperoni");
 
-        //check to stop app
-        if((pizzaiolos[4].getPizzaStackSize() >= 1) ) {
-            Gdx.app.exit();
+        //check to stop app OR print Time
+        if((pizzaiolos[4].getPizzaStackSize() == 1)) {
+            endSeqTime = System.currentTimeMillis();
+            elapsedTime = endSeqTime - startSeqTime;
+            //Gdx.app.exit();
+            //System.out.println(elapsedTime);
         }
-
-        //Draws: //semaphore here for the draw of multithreading
+        long printElapsedTime = elapsedTime; //elapsedTime at the EXACT moment it entered the if
+        BitmapFont font = new BitmapFont();
+        Vector2 fontPos = new Vector2(600f,80f);
         batch.begin();
+        font.draw(batch,"Sequential Time: " + printElapsedTime, fontPos.x, fontPos.y);
         batch.end();
 
         for (int i = 0; i < suppliers.length; i++) {
@@ -129,10 +135,6 @@ public class ST_Simulation extends ApplicationAdapter {
         }
 
         pantry.dispose();
-
-        endSeqTime = System.currentTimeMillis();//fim da analise de tempo
-        elapsedTime = endSeqTime - startSeqTime; //calc elapsedTime
-        System.out.println(elapsedTime);
 
         //Dispose threads
     }
